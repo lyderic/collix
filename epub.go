@@ -5,13 +5,13 @@ import (
 )
 
 type Epub struct {
-	FileName    string `json:"FileName"`
-	Directory   string `json:"Directory"`
-	Title       string `json:"Title"`
-	Author      string `json:"Creator"`
-	Language    string `json:"Language"`
-	Publisher   string `json:"Publisher"`
-	Description string `json:"Description"`
+	FileName    string      `json:"FileName"`
+	Directory   string      `json:"Directory"`
+	Title       interface{} `json:"Title"`
+	Author      interface{} `json:"Creator"`
+	Language    interface{} `json:"Language"`
+	Publisher   interface{} `json:"Publisher"`
+	Description interface{} `json:"Description"`
 }
 
 func (epub Epub) String() string {

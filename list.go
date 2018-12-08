@@ -43,14 +43,13 @@ func process(path string, directory *Directory) (err error) {
 	}
 	if debug {
 		fmt.Println("*************************************************")
+		fmt.Println("PATH:", path)
+		fmt.Println("OUTPUT:")
 		fmt.Println(string(output))
 		fmt.Println("*************************************************")
 		fmt.Println()
 	}
 	err = json.Unmarshal(output, &directory.Epubs)
-	if err != nil {
-		fmt.Printf("ERROR in %q: %s\n", path ,string(output))
-		c(err)
-	}
+	c(err)
 	return
 }

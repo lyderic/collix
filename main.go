@@ -11,7 +11,7 @@ import (
 
 /* Globals */
 const (
-	VERSION = "0.0.1"
+	VERSION = "0.0.2"
 )
 
 var (
@@ -36,7 +36,6 @@ func main() {
 	fmt.Printf("Please wait...")
 	err, epubs := list(basedir)
 	fmt.Printf("\r                     \r")
-	c(err)
 	fmt.Printf("%d epubs found.\n", len(epubs))
 	jsonOutput, err := json.Marshal(epubs)
 	c(err)
