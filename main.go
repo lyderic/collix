@@ -11,7 +11,7 @@ import (
 
 /* Globals */
 const (
-	VERSION = "0.0.3"
+	VERSION = "0.0.4"
 )
 
 var (
@@ -35,9 +35,10 @@ func main() {
 	fmt.Println("Base directory:", basedir)
 	fmt.Printf("Please wait...")
 	err, epubs := list(basedir)
+	c(err)
 	fmt.Printf("\r                     \r")
 	fmt.Printf("%d epubs found.\n", len(epubs))
-	jsonOutput, err := json.Marshal(epubs)
+	jsonOutput, err := json.MarshalIndent(epubs, "", "  ")
 	c(err)
 	err = ioutil.WriteFile(outfile, jsonOutput, 0644)
 	c(err)
