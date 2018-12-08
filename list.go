@@ -8,17 +8,22 @@ import (
 )
 
 func list(basedir string) (err error) {
-	var listing []string
+	var epubs []Epub
 	err = filepath.Walk(basedir, func(path string, fifo os.FileInfo, err error) error {
 		c(err)
 		if fifo.IsDir() {
 			return err
 		}
 		if strings.HasSuffix(path, ".epub") {
-			listing = append(listing, path)
+			var epub Epub
+			epub.Path = path
+			epubs = append(epubs, epub)
 		}
 		return err
 	})
-	fmt.Printf("%d epubs found.\n", len(listing))
+	fmt.Printf("%d epubs found.\n", len(epubs))
+	if verbose {
+		fmt.Println(epubs)
+	}
 	return
 }
