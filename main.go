@@ -8,6 +8,10 @@ import (
 )
 
 /* Globals */
+const (
+	VERSION = "0.0.1"
+)
+
 var (
 	verbose bool
 )
@@ -30,6 +34,7 @@ func main() {
 }
 
 func usage() {
+	fmt.Printf("collix v.%s - (c) Lyderic Landry, London 2018\n", VERSION)
 	fmt.Println("Usage: collix <option> <directory>")
 	fmt.Println("Options:")
 	flag.PrintDefaults()
