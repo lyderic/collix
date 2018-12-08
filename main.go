@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -13,11 +15,13 @@ const (
 )
 
 var (
-	verbose bool
+	debug bool
 )
 
 func main() {
-	flag.BoolVar(&verbose, "v", false, "be verbose")
+	var outfile string
+	flag.BoolVar(&debug, "debug", false, "debug mode")
+	flag.StringVar(&outfile, "o", "/tmp/listing.json", "JSON output `file`")
 	flag.Parse()
 	if len(flag.Args()) == 0 {
 		usage()
@@ -29,7 +33,14 @@ func main() {
 		return
 	}
 	fmt.Println("Base directory:", basedir)
-	err = list(basedir)
+	fmt.Printf("Please wait...")
+	err, epubs := list(basedir)
+	fmt.Printf("\r                     \r")
+	c(err)
+	fmt.Printf("%d epubs found.\n", len(epubs))
+	jsonOutput, err := json.Marshal(epubs)
+	c(err)
+	err = ioutil.WriteFile(outfile, jsonOutput, 0644)
 	c(err)
 }
 
