@@ -26,13 +26,18 @@ func indexByTab(basedir string) (err error, epubs []Epub) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		bits := strings.Split(line, "	") /* TAB */
-		if len(bits) != 7 {
-			fmt.Println("THIS LINE DOESN'T HAVE 7 FIELDS:", line)
+		ln := len(bits)
+		if ln != 7 {
+			skipping(line, fmt.Sprintf("Incorrect number of fields (has %d, expecting 7)", ln))
 			continue
 		}
 		epub.FileName = bits[0]
 		epub.Directory = bits[1]
 		epub.Title = bits[2]
+		if epub.Title == "" {
+			skipping(line, "'Title' metadata not found")
+			continue
+		}
 		epub.Author = bits[3]
 		epub.Language = bits[4]
 		epub.Publisher = bits[5]
@@ -40,6 +45,13 @@ func indexByTab(basedir string) (err error, epubs []Epub) {
 		epubs = append(epubs, epub)
 	}
 	return
+}
+
+func skipping(line, reason string) {
+	fmt.Println(strings.Repeat("*", 80))
+	fmt.Println("Skipping the following line. Reason:", reason)
+	fmt.Println(line)
+	fmt.Println(strings.Repeat("*", 80))
 }
 
 func indexByJson(basedir string) (err error, epubs []Epub) {
