@@ -7,12 +7,14 @@ import (
 	"path/filepath"
 )
 
-func setup() (basedir, jsonfile, dbfile string) {
+func setup() (basedir, jsonfile, dbfile string, text bool) {
 	var err error
 	jsonfile = fmt.Sprintf("/tmp/%s.json", PROGNAME)
 	dbfile = fmt.Sprintf("/tmp/%s.db", PROGNAME)
+	text = false
 	flag.StringVar(&jsonfile, "json", jsonfile, "JSON output `file`")
 	flag.StringVar(&dbfile, "db", dbfile, "Database `file`")
+	flag.BoolVar(&text, "text", text, "insert text of epub into database (takes a loooong time)")
 	flag.Parse()
 	if len(flag.Args()) == 0 {
 		usage()

@@ -9,16 +9,19 @@ import (
 
 /* Globals */
 const (
-	VERSION  = "0.1.4"
+	VERSION  = "0.2.0"
 	PROGNAME = "collix"
 )
 
 func main() {
-	basedir, jsonfile, dbfile := setup()
+	basedir, jsonfile, dbfile, text := setup()
 	epubs, err := index(basedir)
 	c(err)
 	writeJson(jsonfile, epubs) /* see below */
 	writeDb(dbfile, epubs)     /* in database.go */
+	if text {
+		addText(dbfile, epubs)
+	}
 }
 
 func writeJson(jsonfile string, epubs []Epub) {

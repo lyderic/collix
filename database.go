@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"os/exec"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -37,7 +38,7 @@ func writeDb(dbfile string, epubs []Epub) {
 			epub.Author,
 			epub.Language,
 			epub.Publisher,
-			epub.Description)
+			epub.Description, "")
 		if err != nil {
 			fmt.Println("THIS EPUB IS NOT VALID FOR DB:", epub)
 			tx.Rollback()
@@ -45,6 +46,34 @@ func writeDb(dbfile string, epubs []Epub) {
 	}
 	tx.Commit()
 	fmt.Printf("Database written to %q in %s\n", dbfile, time.Since(start))
+}
+
+func addText(dbfile string, epubs []Epub) {
+	db, err := sql.Open("sqlite3", dbfile)
+	c(err)
+	if db == nil {
+		panic("db nil")
+	}
+	defer db.Close()
+	tx, err := db.Begin()
+	c(err)
+	stmt, err := tx.Prepare("UPDATE epubs SET TextContent = ? WHERE Directory = ? AND FileName = ?;")
+	c(err)
+	defer stmt.Close()
+	for _, epub := range epubs {
+		path := epub.Directory + "/" + epub.FileName
+		fmt.Printf("Processing text of %q\n", path)
+		output, err := exec.Command("epub2txt", path).Output()
+		if err != nil {
+			fmt.Println("Skipping", path)
+			continue
+		}
+		text := string(output)
+		fmt.Println(len(text))
+		_, err = stmt.Exec(text, epub.Directory, epub.FileName)
+		c(err)
+	}
+	tx.Commit()
 }
 
 var schema = `
@@ -55,20 +84,22 @@ CREATE TABLE IF NOT EXISTS epubs(
 	Author      TEXT NOT NULL,
 	Language    TEXT NOT NULL,
 	Publisher   TEXT NOT NULL,
-	Description TEXT NOT NULL
+	Description TEXT NOT NULL,
+	TextContent TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS meta(
 	Timestamp   TEXT NOT NULL,
 	Version     TEXT NOT NULL
 );
 `
-var insert = `INSERT OR REPLACE INTO epubs(
+var insert = `INSERT INTO epubs(
 	FileName,
 	Directory,
 	Title,
 	Author,
 	Language,
 	Publisher,
-	Description
-) VALUES (?, ?, ?, ?, ?, ?, ?);
+	Description,
+	TextContent
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 `
