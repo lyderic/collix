@@ -12,7 +12,7 @@ import (
 
 /* Globals */
 const (
-	VERSION  = "0.0.9"
+	VERSION  = "0.1.1"
 	PROGNAME = "collix"
 )
 

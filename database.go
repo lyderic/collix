@@ -18,9 +18,13 @@ func writeDb(dbfile string, epubs []Epub) {
 		panic("db nil")
 	}
 	defer db.Close()
-	tx,err := db.Begin()
+	tx, err := db.Begin()
 	c(err)
 	_, err = db.Exec(create)
+	c(err)
+	_, err = db.Exec(fmt.Sprintf("INSERT INTO meta VALUES('%s', '%s');",
+		time.Now().UTC().Format("2006-01-02 15:04:05"),
+		VERSION))
 	c(err)
 	stmt, _ := db.Prepare(insert)
 	c(err)
@@ -49,6 +53,10 @@ var create = `CREATE TABLE IF NOT EXISTS epubs(
 	Language    TEXT NOT NULL,
 	Publisher   TEXT NOT NULL,
 	Description TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS meta(
+	Timestamp   TEXT NOT NULL,
+	Version     TEXT NOT NULL
 );
 `
 var insert = `INSERT OR REPLACE INTO epubs(
