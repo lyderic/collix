@@ -26,11 +26,12 @@ func writeDb(dbfile string, epubs []Epub) {
 		VERSION))
 	c(err)
 	tx, err := db.Begin()
-	stmt, _ := tx.Prepare(insert)
+	c(err)
+	stmt, err := tx.Prepare(insert)
 	c(err)
 	defer stmt.Close()
-	for idx, epub := range epubs {
-		result, err := stmt.Exec(epub.FileName,
+	for _, epub := range epubs {
+		_, err := stmt.Exec(epub.FileName,
 			epub.Directory,
 			epub.Title,
 			epub.Author,
@@ -39,11 +40,8 @@ func writeDb(dbfile string, epubs []Epub) {
 			epub.Description)
 		if err != nil {
 			fmt.Println("THIS EPUB IS NOT VALID FOR DB:", epub)
+			tx.Rollback()
 		}
-		lastinsert, err := result.LastInsertId()
-		c(err)
-		fmt.Printf("Insert #%d: row id #%d", idx+1, lastinsert)
-		fmt.Printf("\r                                       \r")
 	}
 	tx.Commit()
 	fmt.Printf("Database written to %q in %s\n", dbfile, time.Since(start))

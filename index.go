@@ -3,29 +3,39 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"os/exec"
 	"strings"
+	"time"
 )
 
-func index(basedir string) (err error, epub []Epub) {
-	return indexByTab(basedir)
-	//return indexByJson(basedir)
+func index(basedir string) (epubs []Epub, err error) {
+	start := time.Now()
+	fmt.Printf("Indexing, please wait...")
+	epubs, err = indexByTab(basedir)
+	if err != nil {
+		return
+	}
+	fmt.Printf("\r                          \r")
+	fmt.Printf("%d epubs indexed in %s.\n", len(epubs), time.Since(start))
+	return
 }
 
-func indexByTab(basedir string) (err error, epubs []Epub) {
+func indexByTab(basedir string) (epubs []Epub, err error) {
 	cmd := exec.Command("exiftool", "-table", "-recurse", "-ext", "epub",
 		"-FileName", "-Directory",
 		"-Title", "-Creator", "-Language",
 		"-Publisher", "-Description", basedir)
 	output, err := cmd.Output()
-	c(err)
+	if err != nil {
+		return
+	}
+	fmt.Println("Output size:", len(output), "bytes")
 	var epub Epub
 	scanner := bufio.NewScanner(bytes.NewReader(output))
 	for scanner.Scan() {
 		line := scanner.Text()
-		bits := strings.Split(line, "	") /* TAB */
+		bits := strings.Split(line, "\t")
 		ln := len(bits)
 		if ln != 7 {
 			skipping(line, fmt.Sprintf("Incorrect number of fields (has %d, expecting 7)", ln))
@@ -52,13 +62,4 @@ func skipping(line, reason string) {
 	fmt.Println("Skipping the following line. Reason:", reason)
 	fmt.Println(line)
 	fmt.Println(strings.Repeat("*", 80))
-}
-
-func indexByJson(basedir string) (err error, epubs []Epub) {
-	cmd := exec.Command("exiftool", "-json", "-sep", ",", "-recurse", "-ext", "epub", basedir)
-	output, err := cmd.Output()
-	c(err)
-	err = json.Unmarshal(output, &epubs)
-	c(err)
-	return
 }
