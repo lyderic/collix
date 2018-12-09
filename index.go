@@ -30,7 +30,6 @@ func indexByTab(basedir string) (epubs []Epub, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println("Output size:", len(output), "bytes")
 	var epub Epub
 	scanner := bufio.NewScanner(bytes.NewReader(output))
 	for scanner.Scan() {
