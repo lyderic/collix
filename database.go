@@ -18,6 +18,8 @@ func writeDb(dbfile string, epubs []Epub) {
 		panic("db nil")
 	}
 	defer db.Close()
+	tx,err := db.Begin()
+	c(err)
 	_, err = db.Exec(create)
 	c(err)
 	stmt, _ := db.Prepare(insert)
@@ -35,6 +37,7 @@ func writeDb(dbfile string, epubs []Epub) {
 			fmt.Println("THIS EPUB IS NOT VALID FOR DB:", epub)
 		}
 	}
+	tx.Commit()
 	fmt.Printf("Database written to %q in %s\n", dbfile, time.Since(start))
 }
 
