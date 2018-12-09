@@ -18,19 +18,19 @@ func writeDb(dbfile string, epubs []Epub) {
 		panic("db nil")
 	}
 	defer db.Close()
-	tx, err := db.Begin()
 	c(err)
-	_, err = db.Exec(create)
+	_, err = db.Exec(schema)
 	c(err)
 	_, err = db.Exec(fmt.Sprintf("INSERT INTO meta VALUES('%s', '%s');",
 		time.Now().UTC().Format("2006-01-02 15:04:05"),
 		VERSION))
 	c(err)
-	stmt, _ := db.Prepare(insert)
+	tx, err := db.Begin()
+	stmt, _ := tx.Prepare(insert)
 	c(err)
 	defer stmt.Close()
-	for _, epub := range epubs {
-		_, err = stmt.Exec(epub.FileName,
+	for idx, epub := range epubs {
+		result, err := stmt.Exec(epub.FileName,
 			epub.Directory,
 			epub.Title,
 			epub.Author,
@@ -40,12 +40,17 @@ func writeDb(dbfile string, epubs []Epub) {
 		if err != nil {
 			fmt.Println("THIS EPUB IS NOT VALID FOR DB:", epub)
 		}
+		lastinsert, err := result.LastInsertId()
+		c(err)
+		fmt.Printf("Insert #%d: row id #%d", idx+1, lastinsert)
+		fmt.Printf("\r                                       \r")
 	}
 	tx.Commit()
 	fmt.Printf("Database written to %q in %s\n", dbfile, time.Since(start))
 }
 
-var create = `CREATE TABLE IF NOT EXISTS epubs(
+var schema = `
+CREATE TABLE IF NOT EXISTS epubs(
 	FileName    TEXT NOT NULL,
 	Directory   TEXT NOT NULL,
 	Title       TEXT NOT NULL,
