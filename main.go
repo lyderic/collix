@@ -11,17 +11,15 @@ import (
 
 /* Globals */
 const (
-	VERSION = "0.0.4"
-)
-
-var (
-	debug bool
+	VERSION  = "0.0.5"
+	PROGNAME = "collix"
 )
 
 func main() {
-	var outfile string
-	flag.BoolVar(&debug, "debug", false, "debug mode")
-	flag.StringVar(&outfile, "o", "/tmp/listing.json", "JSON output `file`")
+	jsonfile := fmt.Sprintf("/tmp/%s.json", PROGNAME)
+	dbfile := fmt.Sprintf("/tmp/%s.db", PROGNAME)
+	flag.StringVar(&jsonfile, "json", jsonfile, "JSON output `file`")
+	flag.StringVar(&dbfile, "db", dbfile, "Database `file`")
 	flag.Parse()
 	if len(flag.Args()) == 0 {
 		usage()
@@ -33,19 +31,25 @@ func main() {
 		return
 	}
 	fmt.Println("Base directory:", basedir)
-	fmt.Printf("Please wait...")
+	fmt.Printf("Indexing, please wait...")
 	err, epubs := list(basedir)
 	c(err)
-	fmt.Printf("\r                     \r")
+	fmt.Printf("\r                          \r")
 	fmt.Printf("%d epubs found.\n", len(epubs))
-	jsonOutput, err := json.MarshalIndent(epubs, "", "  ")
+	writeJson(jsonfile, epubs)
+	writeDb(dbfile, epubs)
+}
+
+func writeJson(jsonfile string, epubs []Epub) {
+	output, err := json.MarshalIndent(epubs, "", "  ")
 	c(err)
-	err = ioutil.WriteFile(outfile, jsonOutput, 0644)
+	err = ioutil.WriteFile(jsonfile, output, 0644)
 	c(err)
+	fmt.Println("JSON written to", jsonfile)
 }
 
 func usage() {
-	fmt.Printf("collix v.%s - (c) Lyderic Landry, London 2018\n", VERSION)
+	fmt.Printf("%s v.%s - (c) Lyderic Landry, London 2018\n", PROGNAME, VERSION)
 	fmt.Println("Usage: collix <option> <directory>")
 	fmt.Println("Options:")
 	flag.PrintDefaults()
