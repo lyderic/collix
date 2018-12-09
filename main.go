@@ -12,7 +12,7 @@ import (
 
 /* Globals */
 const (
-	VERSION  = "0.0.6"
+	VERSION  = "0.0.7"
 	PROGNAME = "collix"
 )
 
@@ -34,20 +34,21 @@ func main() {
 	fmt.Println("Base directory:", basedir)
 	start := time.Now()
 	fmt.Printf("Indexing, please wait...")
-	err, epubs := list(basedir)
+	err, epubs := index(basedir)
 	c(err)
 	fmt.Printf("\r                          \r")
 	fmt.Printf("%d epubs indexed in %s.\n", len(epubs), time.Since(start))
 	writeJson(jsonfile, epubs) /* see below */
-	//writeDb(dbfile, epubs)     /* in database.go */
+	writeDb(dbfile, epubs)     /* in database.go */
 }
 
 func writeJson(jsonfile string, epubs []Epub) {
+	start := time.Now()
 	output, err := json.MarshalIndent(epubs, "", "  ")
 	c(err)
 	err = ioutil.WriteFile(jsonfile, output, 0644)
 	c(err)
-	fmt.Println("JSON written to", jsonfile)
+	fmt.Printf("JSON written to %q in %s\n", jsonfile, time.Since(start))
 }
 
 func usage() {
