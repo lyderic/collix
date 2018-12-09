@@ -7,11 +7,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 /* Globals */
 const (
-	VERSION  = "0.0.5"
+	VERSION  = "0.0.6"
 	PROGNAME = "collix"
 )
 
@@ -31,13 +32,14 @@ func main() {
 		return
 	}
 	fmt.Println("Base directory:", basedir)
+	start := time.Now()
 	fmt.Printf("Indexing, please wait...")
 	err, epubs := list(basedir)
 	c(err)
 	fmt.Printf("\r                          \r")
-	fmt.Printf("%d epubs found.\n", len(epubs))
-	writeJson(jsonfile, epubs)
-	writeDb(dbfile, epubs)
+	fmt.Printf("%d epubs indexed in %s.\n", len(epubs), time.Since(start))
+	writeJson(jsonfile, epubs) /* see below */
+	//writeDb(dbfile, epubs)     /* in database.go */
 }
 
 func writeJson(jsonfile string, epubs []Epub) {

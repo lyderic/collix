@@ -20,7 +20,13 @@ func writeDb(dbfile string, epubs []Epub) {
 	c(err)
 	defer stmt.Close()
 	for _, epub := range epubs {
-		_, err = stmt.Exec(epub.FileName, epub.Directory, epub.Title, epub.Author, epub.Language, epub.Publisher, epub.Description)
+		_, err = stmt.Exec(epub.FileName,
+		epub.Directory,
+		epub.Title,
+		epub.Author,
+		epub.Language,
+		epub.Publisher,
+		epub.Description)
 		c(err)
 	}
 	fmt.Println("Database written to", dbfile)
