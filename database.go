@@ -3,16 +3,14 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"os/exec"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func writeDb(dbfile string, epubs []Epub) {
+func createDb(dbfile string, epubs []Epub) {
 	start := time.Now()
-	os.Remove(dbfile)
 	db, err := sql.Open("sqlite3", dbfile)
 	c(err)
 	if db == nil {

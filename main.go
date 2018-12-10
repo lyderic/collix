@@ -1,34 +1,26 @@
-package main
+/*
+ * TO DO:
+ *
+ * -- Add possibility to insert or update one row only in DB (not recreating the whole db everytime there is a little change)
+ * -- Improve performance of insert full text (-text option) with goroutines
+ */
 
-import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"time"
-)
+package main
 
 /* Globals */
 const (
-	VERSION  = "0.2.0"
+	VERSION  = "0.2.1"
 	PROGNAME = "collix"
 )
 
 func main() {
-	basedir, jsonfile, dbfile, text := setup()
-	epubs, err := index(basedir)
-	c(err)
-	writeJson(jsonfile, epubs) /* see below */
-	writeDb(dbfile, epubs)     /* in database.go */
-	if text {
-		addText(dbfile, epubs)
+	configuration, command := setup()
+	switch command {
+	case "init":
+		initialize(configuration)
+	case "info":
+		info(configuration)
+	default:
+		usage()
 	}
-}
-
-func writeJson(jsonfile string, epubs []Epub) {
-	start := time.Now()
-	output, err := json.MarshalIndent(epubs, "", "  ")
-	c(err)
-	err = ioutil.WriteFile(jsonfile, output, 0644)
-	c(err)
-	fmt.Printf("JSON written to %q in %s\n", jsonfile, time.Since(start))
 }
